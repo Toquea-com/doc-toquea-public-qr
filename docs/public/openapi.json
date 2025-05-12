@@ -1,0 +1,393 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Servicio de Autenticación y Generación de QR - Toquea",
+    "description": "API para autenticación de clientes y generación de códigos QR de pago.",
+    "version": "1.1.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.ejemplo.com/v1",
+      "description": "Servidor de Producción"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Autenticación",
+      "description": "Servicio para la autenticación del cliente."
+    },
+    {
+      "name": "QR",
+      "description": "Servicio para la creación y consulta de códigos QR."
+    }
+  ],
+  "paths": {
+    "/auth": {
+      "post": {
+        "tags": ["Autenticación"],
+        "summary": "Servicio de Login",
+        "description": "Autenticación del usuario. Devuelve un token de acceso válido por 1 hora.",
+        "parameters": [
+          {
+            "name": "apiKey",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Clave API asignada por Toquea."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "description": "Nombre de usuario asignado por Toquea."
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "Password asignado por Toquea."
+                  }
+                },
+                "required": ["username", "password"]
+              },
+              "example": {
+                "username": "clienteabc",
+                "password": "admin123"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Inicio de sesión exitoso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "accessToken": {
+                      "type": "string",
+                      "description": "Token de acceso que se utilizará para peticiones futuras."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/qr": {
+      "post": {
+        "tags": ["QR"],
+        "summary": "Create QR",
+        "description": "Servicio para iniciar la solicitud de creación de un QR de pago.",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Token de acceso devuelto por el servicio de login."
+          },
+          {
+            "name": "merchantId",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Identificador único del merchant entregado por Toquea."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "amount": {
+                    "type": "number",
+                    "description": "Monto a recaudar. Entre 0.10 y 500.00 PEN."
+                  },
+                  "currency": {
+                    "type": "string",
+                    "enum": ["PEN", "USD"],
+                    "description": "Tipo de moneda (solo PEN habilitado)."
+                  },
+                  "gloss": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "description": "Descripción del pago."
+                  },
+                  "qrCustomInfo": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/QrInfo"
+                    },
+                    "description": "Información adicional del negocio para el pago."
+                  }
+                },
+                "required": ["amount", "currency", "qrCustomInfo"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "QR creado exitosamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": { "type": "integer" },
+                    "errors": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "Identificador único del QR de pago."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Solicitud inválida" },
+          "401": { "description": "Credenciales inválidas" }
+        }
+      }
+    },
+    "/qr/{qrId}": {
+      "get": {
+        "tags": ["QR"],
+        "summary": "Get QR",
+        "description": "Consulta el estado de creación del QR. Si está en estado CREATED, incluye el hash.",
+        "parameters": [
+          {
+            "name": "qrId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Identificador único de QR creado."
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Token de acceso devuelto por el servicio de login."
+          },
+          {
+            "name": "merchantId",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Identificador único del merchant entregado por Toquea."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Consulta exitosa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": { "type": "integer" },
+                    "errors": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string", "format": "uuid" },
+                        "state": {
+                          "type": "string",
+                          "enum": ["CREATED", "PENDING"]
+                        },
+                        "hash": { "type": "string" },
+                        "amount": { "type": "number" },
+                        "currency": { "type": "string" },
+                        "gloss": { "type": "string" },
+                        "customInfo": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/CustomInfoResponse"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Credenciales inválidas" },
+          "404": { "description": "QR no encontrado" }
+        }
+      }
+    }
+  },
+  "webhooks": {
+    "paymentNotification": {
+      "post": {
+        "summary": "Este servicio implementado por el cliente será utilizado para informar el pago de un QR.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["instructionId", "qrId", "transferDetails", "originDetails"],
+                "properties": {
+                  "instructionId": {
+                    "type": "string",
+                    "description": "Código único de identificación de la operación"
+                  },
+                  "qrId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "Identificador único de QR creado."
+                  },
+                  "transferDetails": {
+                    "type": "object",
+                    "description": "Detalles de la transferencia.",
+                    "schema": {
+                      "$ref": "#/components/schemas/TransferDetails"
+                    }
+                  },
+                  "originDetails": {
+                    "type": "object",
+                    "description": "Detalles del cliente origen",
+                    "schema": {
+                      "$ref": "#/components/schemas/OriginDetails"
+                    }
+                  },
+                  "date": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Fecha y hora de confirmación."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "QR creado exitosamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": { "type": "integer", "description": "Código de respuesta válido. Se validará el código de respuesta con estado 200."},
+                    "message": { "type": "string", "description": "Descripción del código de respuesta." },
+                    "status": { "type": "boolean", "description": "Estado de validación para una petición procesada." },
+                    "date": { "type": "string", "format": "date-time", "description": "Fecha de finalización del proceso" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "QrInfo": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Clave identificador personalizada."
+          },
+          "value": {
+            "type": "string",
+            "description": "Valor para la clave personalizada."
+          }
+        },
+        "required": ["code", "value"]
+      },
+      "CustomInfoResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Clave identificador personalizada."
+          },
+          "value": {
+            "type": "string",
+            "description": "Valor para la clave personalizada."
+          }
+        }
+      },
+      "TransferDetails": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "number",
+            "description": "Monto de la transacción."
+          },
+          "currency": {
+            "type": "string",
+            "enum": ["PEN", "USD"],
+            "description": "Tipo de moneda."
+          }
+        },
+        "required": ["amount", "currency"]
+      },
+      "OriginDetails": {
+        "type": "object",
+        "properties": {
+          "cci": {
+            "type": "string",
+            "description": "Código de cuenta interbancaria del cliente originante."
+          },
+          "name": {
+            "type": "string",
+            "description": "Nombre del cliente originante."
+          },
+          "documentType": {
+            "type": "string",
+            "enum": ["DNI"],
+            "description": "Tipo de documento del cliente originante."
+          },
+          "documentNumber": {
+            "type": "string",
+            "description": "Número de documento del cliente originante."
+          }
+        },
+        "required": ["name","documentType", "documentNumber"]
+      }
+    }
+  }
+}

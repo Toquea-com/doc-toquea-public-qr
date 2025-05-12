@@ -1,0 +1,17 @@
+:root {
+  --vp-c-brand-1: #222E76;
+  --vp-c-brand-2: #b0e07a;
+  --vp-c-brand-3: #86c440;
+
+  --vp-button-brand-active-bg: #5e9222;
+}
+
+.dark {
+  --vp-c-brand-1: #8890c0;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --vp-c-brand-1: #8890c0;
+  }
+}
