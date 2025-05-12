@@ -41,4 +41,6 @@ export default defineConfig({
       }
     ],
   },
+
+  base: '/doc-toquea-public-qr/',
 });
