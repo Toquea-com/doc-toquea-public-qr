@@ -8,13 +8,15 @@ title: Introducción
 La API de **QR Payments** está diseñada para simplificar la gestión de cobros mediante códigos QR, proveyendo dos capacidades clave:
 
 
-- **Registro de comerciantes**
-    - Permite crear y configurar el perfil de un comercio o punto de venta dentro de nuestra plataforma, definiendo datos esenciales (identificador, nombre, moneda, información de banco, etc.).
+- **Autenticación de comerciantes**
+    - Permite autenticar al comerciante para obtener un `accessToken` que se utilizara en las siguiente llamadas del api de Qr.
 - **Generación y consulta de QR de pago**
-    - **Crear QR**: a partir de un monto, moneda y descripción, genera un código QR listo para ser escaneado por el cliente.
-    - **Consultar QR**: recupera el estado y la información asociada a un código QR previamente emitido.
+    - **Crear QR**: a partir de un monto, moneda, descripción y/o una informacion personalizada opcional, inicia la solicitud de cracion de un QR.
+    - **Consultar QR**: consulta es estado de la solicitud de creacion de QR. De estar finalizado devolvera el campo `hash` que debe ser utilizar para construir el QR en algun cliente.
+- **Webhook**
+    - **Notificación de pago**: definición de servicio a construir por el comerciante para que Toquea pueda informa sobre el pago del QR. 
 
-Con esta API, los integradores podrán centrarse en la experiencia de usuario y el flujo de negocio, delegando la creación, expiración y consulta de códigos QR en un servicio único y consistente.
+Con esta API, los integradores podrán centrarse en la experiencia de usuario y el flujo de negocio, delegando la creación y consulta de códigos QR en un servicio único y consistente.
 
 ## Propósito y alcance
 

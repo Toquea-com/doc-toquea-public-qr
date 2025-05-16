@@ -45,7 +45,7 @@ El sistema de Toquea enviará una solicitud `POST` al endpoint proporcionado por
 | `originDetails.name`           | string            | ✅         | Nombre del cliente originante.                         |
 | `originDetails.documentType`   | string            | ✅         | Tipo de documento (`DNI`).                             |
 | `originDetails.documentNumber` | string            | ✅         | Número de documento del cliente.                       |
-| `date`                         | string (ISO 8601) | ❌         | Fecha y hora de confirmación del pago.                 |
+| `date`                         | string (ISO 8601) | ✅         | Fecha y hora de confirmación del pago.                 |
 
 
 ## ✅ Respuesta Esperada (200 OK)

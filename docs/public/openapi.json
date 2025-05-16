@@ -7,8 +7,8 @@
   },
   "servers": [
     {
-      "url": "https://api.ejemplo.com/v1",
-      "description": "Servidor de Producción"
+      "url": "https://api.dev.toquea.net",
+      "description": "Servidor de Desarrollo"
     }
   ],
   "tags": [
@@ -24,18 +24,21 @@
   "paths": {
     "/auth": {
       "post": {
-        "tags": ["Autenticación"],
+        "tags": [
+          "Autenticación"
+        ],
         "summary": "Servicio de Login",
-        "description": "Autenticación del usuario. Devuelve un token de acceso válido por 1 hora.",
+        "description": "Autenticación del usuario. Devuelve un `accessToken` válido por 1 hora.",
         "parameters": [
           {
-            "name": "apiKey",
+            "name": "x-api-key",
             "in": "header",
             "required": true,
             "schema": {
               "type": "string"
             },
-            "description": "Clave API asignada por Toquea."
+            "description": "Clave API asignada por Toquea.",
+            "example": "nH05DPc1Uj50UHmrUagO77TUa2omL3l2aINJP0zA"
           }
         ],
         "requestBody": {
@@ -47,18 +50,19 @@
                 "properties": {
                   "username": {
                     "type": "string",
+                    "example": "clienteabc",
                     "description": "Nombre de usuario asignado por Toquea."
                   },
                   "password": {
                     "type": "string",
+                    "example": "admin123",
                     "description": "Password asignado por Toquea."
                   }
                 },
-                "required": ["username", "password"]
-              },
-              "example": {
-                "username": "clienteabc",
-                "password": "admin123"
+                "required": [
+                  "username",
+                  "password"
+                ]
               }
             }
           }
@@ -79,13 +83,45 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Acceso denegado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number",
+                      "description": "Código de error.",
+                      "example": 401
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "description": "descripción de error",
+                        "example": "Incorrect username or password"
+                      }
+                    },
+                    "data": null
+                  },
+                  "required":[
+                    "amount",
+                    "currency"
+                  ]
+                }
+              }
+            }
           }
         }
       }
     },
     "/qr": {
       "post": {
-        "tags": ["QR"],
+        "tags": [
+          "QR"
+        ],
         "summary": "Create QR",
         "description": "Servicio para iniciar la solicitud de creación de un QR de pago.",
         "parameters": [
@@ -96,7 +132,8 @@
             "schema": {
               "type": "string"
             },
-            "description": "Token de acceso devuelto por el servicio de login."
+            "description": "Token de acceso devuelto por el servicio de login.",
+            "example": "eyJraWQiOiJRWGJGNzJ0STRQRmpHQkREREJ2ZzFSSs..."
           },
           {
             "name": "merchantId",
@@ -106,7 +143,8 @@
               "type": "string",
               "format": "uuid"
             },
-            "description": "Identificador único del merchant entregado por Toquea."
+            "description": "Identificador único del merchant entregado por Toquea.",
+            "example": "533a180d-bd1f-422b-827a-9ea29d5fe774"
           }
         ],
         "requestBody": {
@@ -115,20 +153,24 @@
             "application/json": {
               "schema": {
                 "type": "object",
+                "required": ["amount","currency"],
                 "properties": {
                   "amount": {
                     "type": "number",
-                    "description": "Monto a recaudar. Entre 0.10 y 500.00 PEN."
+                    "description": "Monto a recaudar. Entre 0.10 y 500.00 PEN.",
+                    "example": 12.50
                   },
                   "currency": {
                     "type": "string",
-                    "enum": ["PEN", "USD"],
-                    "description": "Tipo de moneda (solo PEN habilitado)."
+                    "length": 3,
+                    "description": "Tipo de moneda (solo PEN habilitado).",
+                    "example": "PEN"
                   },
                   "gloss": {
                     "type": "string",
                     "maxLength": 100,
-                    "description": "Descripción del pago."
+                    "description": "Descripción del pago.",
+                    "example": "pago por pedido abc"
                   },
                   "qrCustomInfo": {
                     "type": "array",
@@ -137,8 +179,7 @@
                     },
                     "description": "Información adicional del negocio para el pago."
                   }
-                },
-                "required": ["amount", "currency", "qrCustomInfo"]
+                }
               }
             }
           }
@@ -151,17 +192,18 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "code": { "type": "integer" },
-                    "errors": {
-                      "type": "array",
-                      "items": { "type": "string" }
+                    "code": {
+                      "type": "integer",
+                      "example": 200
                     },
+                    "errors": null,
                     "data": {
                       "type": "object",
                       "properties": {
                         "id": {
                           "type": "string",
-                          "description": "Identificador único del QR de pago."
+                          "description": "Identificador único del QR de pago.",
+                          "example": "e86e07b1-984c-48f6-9873-3a057c8d743e"
                         }
                       }
                     }
@@ -170,14 +212,57 @@
               }
             }
           },
-          "400": { "description": "Solicitud inválida" },
-          "401": { "description": "Credenciales inválidas" }
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number",
+                      "description": "Código de error.",
+                      "example": 400
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "description": "descripción de error",
+                        "example": "Amount is required."
+                      }
+                    },
+                    "data": null
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Unauthorized",
+                      "example": "Unauthorized"
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
     "/qr/{qrId}": {
       "get": {
-        "tags": ["QR"],
+        "tags": [
+          "QR"
+        ],
         "summary": "Get QR",
         "description": "Consulta el estado de creación del QR. Si está en estado CREATED, incluye el hash.",
         "parameters": [
@@ -189,7 +274,8 @@
               "type": "string",
               "format": "uuid"
             },
-            "description": "Identificador único de QR creado."
+            "description": "Identificador único de QR creado.",
+            "example": "e86e07b1-984c-48f6-9873-3a057c8d743e"
           },
           {
             "name": "Authorization",
@@ -198,7 +284,8 @@
             "schema": {
               "type": "string"
             },
-            "description": "Token de acceso devuelto por el servicio de login."
+            "description": "Token de acceso devuelto por el servicio de login.",
+            "example": "eyJraWQiOiJRWGJGNzJ0STRQRmpHQkREREJ2ZzFSSs..."
           },
           {
             "name": "merchantId",
@@ -208,7 +295,8 @@
               "type": "string",
               "format": "uuid"
             },
-            "description": "Identificador único del merchant entregado por Toquea."
+            "description": "Identificador único del merchant entregado por Toquea.",
+            "example": "533a180d-bd1f-422b-827a-9ea29d5fe774"
           }
         ],
         "responses": {
@@ -219,23 +307,43 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "code": { "type": "integer" },
-                    "errors": {
-                      "type": "array",
-                      "items": { "type": "string" }
+                    "code": {
+                      "type": "integer",
+                      "example": 200
                     },
+                    "errors": null,
                     "data": {
                       "type": "object",
                       "properties": {
-                        "id": { "type": "string", "format": "uuid" },
+                        "id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "example": "e86e07b1-984c-48f6-9873-3a057c8d743e"
+                        },
                         "state": {
                           "type": "string",
-                          "enum": ["CREATED", "PENDING"]
+                          "enum": [
+                            "CREATED",
+                            "PENDING"
+                          ],
+                          "example": "CREATED"
                         },
-                        "hash": { "type": "string" },
-                        "amount": { "type": "number" },
-                        "currency": { "type": "string" },
-                        "gloss": { "type": "string" },
+                        "hash": {
+                          "type": "string",
+                          "example": "0002010102122637000280010390302202505060..."
+                        },
+                        "amount": {
+                          "type": "number",
+                          "example": 12.50
+                        },
+                        "currency": {
+                          "type": "string",
+                          "example": "PEN"
+                        },
+                        "gloss": {
+                          "type": "string",
+                          "example": "compra bodega 123"
+                        },
                         "customInfo": {
                           "type": "array",
                           "items": {
@@ -249,8 +357,49 @@
               }
             }
           },
-          "401": { "description": "Credenciales inválidas" },
-          "404": { "description": "QR no encontrado" }
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number",
+                      "description": "Código de error.",
+                      "example": 404
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "description": "descripción de error",
+                        "example": "qrId not found."
+                      }
+                    },
+                    "data": null
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Unauthorized",
+                      "example": "Unauthorized"
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     }
@@ -265,7 +414,12 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["instructionId", "qrId", "transferDetails", "originDetails"],
+                "required": [
+                  "instructionId",
+                  "qrId",
+                  "transferDetails",
+                  "originDetails"
+                ],
                 "properties": {
                   "instructionId": {
                     "type": "string",
@@ -308,10 +462,23 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "code": { "type": "integer", "description": "Código de respuesta válido. Se validará el código de respuesta con estado 200."},
-                    "message": { "type": "string", "description": "Descripción del código de respuesta." },
-                    "status": { "type": "boolean", "description": "Estado de validación para una petición procesada." },
-                    "date": { "type": "string", "format": "date-time", "description": "Fecha de finalización del proceso" }
+                    "code": {
+                      "type": "integer",
+                      "description": "Código de respuesta válido. Se validará el código de respuesta con estado 200."
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Descripción del código de respuesta."
+                    },
+                    "status": {
+                      "type": "boolean",
+                      "description": "Estado de validación para una petición procesada."
+                    },
+                    "date": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Fecha de finalización del proceso"
+                    }
                   }
                 }
               }
@@ -328,14 +495,19 @@
         "properties": {
           "code": {
             "type": "string",
-            "description": "Clave identificador personalizada."
+            "description": "Clave identificador personalizada.",
+            "example": "agencia"
           },
           "value": {
             "type": "string",
-            "description": "Valor para la clave personalizada."
+            "description": "Valor para la clave personalizada.",
+            "example": "1234"
           }
         },
-        "required": ["code", "value"]
+        "required": [
+          "code",
+          "value"
+        ]
       },
       "CustomInfoResponse": {
         "type": "object",
@@ -359,11 +531,17 @@
           },
           "currency": {
             "type": "string",
-            "enum": ["PEN", "USD"],
+            "enum": [
+              "PEN",
+              "USD"
+            ],
             "description": "Tipo de moneda."
           }
         },
-        "required": ["amount", "currency"]
+        "required": [
+          "amount",
+          "currency"
+        ]
       },
       "OriginDetails": {
         "type": "object",
@@ -378,7 +556,9 @@
           },
           "documentType": {
             "type": "string",
-            "enum": ["DNI"],
+            "enum": [
+              "DNI"
+            ],
             "description": "Tipo de documento del cliente originante."
           },
           "documentNumber": {
@@ -386,7 +566,11 @@
             "description": "Número de documento del cliente originante."
           }
         },
-        "required": ["name","documentType", "documentNumber"]
+        "required": [
+          "name",
+          "documentType",
+          "documentNumber"
+        ]
       }
     }
   }
