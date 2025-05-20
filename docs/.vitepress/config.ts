@@ -14,7 +14,7 @@ export default defineConfig({
   title: 'Toquea QR API',
   description: 'La API de QR Payments está diseñada para simplificar la gestión de cobros mediante códigos QR.',
 
-  head: [['link', { rel: 'icon', href: 'public/favicon.svg' }]],
+  head: [['link', { rel: 'icon', href: '/public/favicon.svg' }]],
 
   themeConfig: {
     nav: [{ text: 'API Reference', link: '/introduction' }],
@@ -23,6 +23,19 @@ export default defineConfig({
       {
         text: 'Introducción',
         link: '/introduction',
+      },
+      {
+        text: 'Integración de cliente JS',
+        items: [
+          {
+            text: 'Guía de inicio rápido',
+            link: '/integrations/'
+          },
+          {
+            text: 'Cliente JS',
+            link: '/integrations/clientJS'
+          }
+        ]
       },
       {
         text: 'Operaciones',

@@ -10,5 +10,8 @@
   "devDependencies": {
     "vitepress": "latest",
     "vitepress-openapi": "latest"
+  },
+  "dependencies": {
+    "vue-mermaid-string": "^7.0.0"
   }
 }
