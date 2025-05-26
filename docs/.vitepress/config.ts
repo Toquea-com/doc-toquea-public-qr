@@ -64,5 +64,5 @@ export default defineConfig({
     ],
   },
 
-  base: '/doc-dev-toquea-qr/',
+  base: '/doc-toquea-public-qr/',
 });
