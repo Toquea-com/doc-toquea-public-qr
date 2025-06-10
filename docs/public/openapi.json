@@ -349,6 +349,11 @@
                           "items": {
                             "$ref": "#/components/schemas/CustomInfoResponse"
                           }
+                        },
+                        "transactionState": {
+                          "type": "string",
+                          "enum": ["PENDING","COMPLETED","MERCHANT_NOTIFIED_FAILED"],
+                          "example": "PENDING"
                         }
                       }
                     }
